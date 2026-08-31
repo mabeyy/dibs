@@ -32,6 +32,25 @@ class OrderPolicy
         return $this->isBuyer($user, $order) && $order->status === OrderStatus::Shipped;
     }
 
+    /**
+     * The buyer may set/update the shipping address until the item ships.
+     */
+    public function updateShippingAddress(User $user, Order $order): bool
+    {
+        return $this->isBuyer($user, $order)
+            && $order->status === OrderStatus::Pending
+            && $order->shipped_at === null;
+    }
+
+    /**
+     * Either party may cancel while the order is still pending.
+     */
+    public function cancel(User $user, Order $order): bool
+    {
+        return ($this->isBuyer($user, $order) || $this->isSeller($user, $order))
+            && $order->status === OrderStatus::Pending;
+    }
+
     private function isBuyer(User $user, Order $order): bool
     {
         return $user->id === $order->buyer_id;

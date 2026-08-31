@@ -20,13 +20,23 @@ use Illuminate\Support\Carbon;
  * @property int $amount_cents
  * @property OrderStatus $status
  * @property PaymentStatus $payment_status
+ * @property string|null $ship_name
+ * @property string|null $ship_line1
+ * @property string|null $ship_line2
+ * @property string|null $ship_city
+ * @property string|null $ship_region
+ * @property string|null $ship_postal_code
+ * @property string|null $ship_country
+ * @property string|null $ship_phone
+ * @property string|null $shipping_carrier
+ * @property string|null $tracking_number
  * @property Carbon|null $shipped_at
  * @property Carbon|null $received_at
  * @property Carbon|null $cancelled_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['listing_id', 'buyer_id', 'shop_id', 'amount_cents', 'status', 'payment_status', 'shipped_at', 'received_at', 'cancelled_at'])]
+#[Fillable(['listing_id', 'buyer_id', 'shop_id', 'amount_cents', 'status', 'payment_status', 'ship_name', 'ship_line1', 'ship_line2', 'ship_city', 'ship_region', 'ship_postal_code', 'ship_country', 'ship_phone', 'shipping_carrier', 'tracking_number', 'shipped_at', 'received_at', 'cancelled_at'])]
 class Order extends Model
 {
     /** @use HasFactory<OrderFactory> */
@@ -47,6 +57,14 @@ class Order extends Model
     public function isCompleted(): bool
     {
         return $this->status === OrderStatus::Completed;
+    }
+
+    /**
+     * Whether the buyer has supplied a shipping destination.
+     */
+    public function hasShippingAddress(): bool
+    {
+        return $this->ship_line1 !== null;
     }
 
     /**
