@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Listing;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class AuctionEndedNotification extends Notification
@@ -20,7 +21,18 @@ class AuctionEndedNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        $mail = (new MailMessage)->subject("Your auction ended: {$this->listing->title}");
+
+        return $this->sold
+            ? $mail->line("Your auction \"{$this->listing->title}\" sold.")
+                ->action('View your sales', route('orders.index'))
+            : $mail->line("Your auction \"{$this->listing->title}\" ended without a winning bid.")
+                ->action('View listing', route('listings.show', $this->listing));
     }
 
     /**

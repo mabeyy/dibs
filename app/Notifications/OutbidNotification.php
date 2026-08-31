@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Listing;
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class OutbidNotification extends Notification
@@ -20,7 +21,16 @@ class OutbidNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject("You've been outbid on {$this->listing->title}")
+            ->line("Someone placed a higher bid on \"{$this->listing->title}\".")
+            ->action('View auction', route('listings.show', $this->listing))
+            ->line('Place another bid to stay in the running.');
     }
 
     /**

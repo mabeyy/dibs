@@ -40,6 +40,18 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
+                // Lightweight feed for the notification bell; only queried when
+                // a user is authenticated.
+                'notifications' => fn () => $request->user() ? [
+                    'unread' => $request->user()->unreadNotifications()->count(),
+                    'items' => $request->user()->notifications()->latest()->take(8)->get()
+                        ->map(fn ($notification): array => [
+                            'id' => $notification->id,
+                            'read_at' => $notification->read_at,
+                            'created_at' => $notification->created_at,
+                            ...$notification->data,
+                        ]),
+                ] : null,
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
