@@ -37,6 +37,7 @@ class ListingController extends Controller
     {
         return Inertia::render('seller/listings/create', [
             'categories' => Category::options(),
+            'subcategories' => Category::subcategoryMap(),
             'conditions' => ItemCondition::options(),
             'types' => ListingType::options(),
         ]);
@@ -51,6 +52,7 @@ class ListingController extends Controller
         $listing = DB::transaction(function () use ($shop, $request, $data, $isAuction): Listing {
             $listing = $shop->listings()->create([
                 'category' => $data['category'],
+                'subcategory' => $data['subcategory'],
                 'type' => $data['type'],
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
@@ -88,6 +90,7 @@ class ListingController extends Controller
         return Inertia::render('seller/listings/edit', [
             'listing' => $listing->load(['images', 'auction']),
             'categories' => Category::options(),
+            'subcategories' => Category::subcategoryMap(),
             'conditions' => ItemCondition::options(),
         ]);
     }
@@ -98,6 +101,7 @@ class ListingController extends Controller
 
         $listing->fill([
             'category' => $data['category'],
+            'subcategory' => $data['subcategory'],
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'brand' => $data['brand'] ?? null,

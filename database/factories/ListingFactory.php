@@ -6,6 +6,7 @@ use App\Enums\Category;
 use App\Enums\ItemCondition;
 use App\Enums\ListingStatus;
 use App\Enums\ListingType;
+use App\Enums\Subcategory;
 use App\Models\Listing;
 use App\Models\Shop;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,9 +21,12 @@ class ListingFactory extends Factory
      */
     public function definition(): array
     {
+        $category = fake()->randomElement(Category::cases());
+
         return [
             'shop_id' => Shop::factory()->verified(),
-            'category' => fake()->randomElement(Category::cases()),
+            'category' => $category,
+            'subcategory' => fake()->randomElement($category->subcategories()),
             'type' => ListingType::Fixed,
             'title' => fake()->words(3, true),
             'description' => fake()->paragraph(),
@@ -54,6 +58,14 @@ class ListingFactory extends Factory
     {
         return $this->state(fn (array $attributes): array => [
             'category' => $category,
+            'subcategory' => fake()->randomElement($category->subcategories()),
+        ]);
+    }
+
+    public function ofSubcategory(Subcategory $subcategory): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'subcategory' => $subcategory,
         ]);
     }
 }

@@ -12,8 +12,11 @@ type Props = {
 
 const CATEGORIES = [
     { value: 'clothing', label: 'Clothing' },
-    { value: 'watches', label: 'Watches' },
     { value: 'bags', label: 'Bags' },
+    { value: 'shoes', label: 'Shoes' },
+    { value: 'watches', label: 'Watches' },
+    { value: 'accessories', label: 'Accessories' },
+    { value: 'jewelry', label: 'Jewelry' },
 ];
 
 export default function Home({ endingSoon, fresh }: Props) {

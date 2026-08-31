@@ -15,21 +15,24 @@ import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { dashboard } from '@/routes';
 import { index as listingsIndex, store } from '@/routes/seller/listings';
-import type { SelectOption } from '@/types';
+import type { SelectOption, SubcategoryMap } from '@/types';
 
 type Props = {
     categories: SelectOption[];
+    subcategories: SubcategoryMap;
     conditions: SelectOption[];
     types: SelectOption[];
 };
 
 export default function CreateListing({
     categories,
+    subcategories,
     conditions,
     types,
 }: Props) {
     const { data, setData, post, processing, errors } = useForm<{
         category: string;
+        subcategory: string;
         type: string;
         title: string;
         description: string;
@@ -43,6 +46,7 @@ export default function CreateListing({
         images: File[];
     }>({
         category: '',
+        subcategory: '',
         type: 'fixed',
         title: '',
         description: '',
@@ -114,7 +118,11 @@ export default function CreateListing({
                                     <Select
                                         value={data.category}
                                         onValueChange={(v) =>
-                                            setData('category', v)
+                                            setData((prev) => ({
+                                                ...prev,
+                                                category: v,
+                                                subcategory: '',
+                                            }))
                                         }
                                     >
                                         <SelectTrigger>
@@ -134,29 +142,64 @@ export default function CreateListing({
                                     <InputError message={errors.category} />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label>Condition</Label>
+                                    <Label>Subcategory</Label>
                                     <Select
-                                        value={data.condition}
+                                        value={data.subcategory}
                                         onValueChange={(v) =>
-                                            setData('condition', v)
+                                            setData('subcategory', v)
                                         }
+                                        disabled={!data.category}
                                     >
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Choose" />
+                                            <SelectValue
+                                                placeholder={
+                                                    data.category
+                                                        ? 'Choose'
+                                                        : 'Pick a category first'
+                                                }
+                                            />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {conditions.map((c) => (
+                                            {(
+                                                subcategories[data.category] ??
+                                                []
+                                            ).map((s) => (
                                                 <SelectItem
-                                                    key={c.value}
-                                                    value={c.value}
+                                                    key={s.value}
+                                                    value={s.value}
                                                 >
-                                                    {c.label}
+                                                    {s.label}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <InputError message={errors.condition} />
+                                    <InputError message={errors.subcategory} />
                                 </div>
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label>Condition</Label>
+                                <Select
+                                    value={data.condition}
+                                    onValueChange={(v) =>
+                                        setData('condition', v)
+                                    }
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Choose" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {conditions.map((c) => (
+                                            <SelectItem
+                                                key={c.value}
+                                                value={c.value}
+                                            >
+                                                {c.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={errors.condition} />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">

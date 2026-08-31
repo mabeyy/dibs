@@ -4,6 +4,7 @@ use App\Enums\Category;
 use App\Enums\ItemCondition;
 use App\Enums\ListingStatus;
 use App\Enums\ListingType;
+use App\Enums\Subcategory;
 use App\Models\Listing;
 use App\Models\Shop;
 use App\Models\User;
@@ -23,6 +24,7 @@ test('a verified seller can create a fixed-price listing that goes live', functi
 
     $this->actingAs($user)->post(route('seller.listings.store'), [
         'category' => Category::Clothing->value,
+        'subcategory' => Subcategory::Jeans->value,
         'type' => ListingType::Fixed->value,
         'title' => 'Vintage denim jacket',
         'condition' => ItemCondition::Good->value,
@@ -32,7 +34,8 @@ test('a verified seller can create a fixed-price listing that goes live', functi
     $listing = Listing::sole();
     expect($listing->status)->toBe(ListingStatus::Active)
         ->and($listing->price_cents)->toBe(4550)
-        ->and($listing->category)->toBe(Category::Clothing);
+        ->and($listing->category)->toBe(Category::Clothing)
+        ->and($listing->subcategory)->toBe(Subcategory::Jeans);
 });
 
 test('creating an auction listing builds an auction and leaves price null', function () {
@@ -40,6 +43,7 @@ test('creating an auction listing builds an auction and leaves price null', func
 
     $this->actingAs($user)->post(route('seller.listings.store'), [
         'category' => Category::Watches->value,
+        'subcategory' => Subcategory::Analog->value,
         'type' => ListingType::Auction->value,
         'title' => 'Seiko diver',
         'condition' => ItemCondition::LikeNew->value,
@@ -70,6 +74,53 @@ test('electronics and other categories are rejected by the enum', function () {
     expect(Listing::count())->toBe(0);
 });
 
+test('all six fashion categories can be listed', function () {
+    [$user] = verifiedSeller();
+
+    foreach (Category::cases() as $category) {
+        $subcategory = $category->subcategories()[0];
+
+        $this->actingAs($user)->post(route('seller.listings.store'), [
+            'category' => $category->value,
+            'subcategory' => $subcategory->value,
+            'type' => ListingType::Fixed->value,
+            'title' => "A {$category->value} item",
+            'condition' => ItemCondition::Good->value,
+            'price' => 25,
+        ])->assertRedirect();
+    }
+
+    expect(Listing::count())->toBe(count(Category::cases()));
+});
+
+test('a subcategory that does not belong to the category is rejected', function () {
+    [$user] = verifiedSeller();
+
+    // Sneakers is a Shoes subcategory, not a Clothing one.
+    $this->actingAs($user)->post(route('seller.listings.store'), [
+        'category' => Category::Clothing->value,
+        'subcategory' => Subcategory::Sneakers->value,
+        'type' => ListingType::Fixed->value,
+        'title' => 'Mismatched item',
+        'condition' => ItemCondition::Good->value,
+        'price' => 25,
+    ])->assertSessionHasErrors('subcategory');
+
+    expect(Listing::count())->toBe(0);
+});
+
+test('a listing requires a subcategory', function () {
+    [$user] = verifiedSeller();
+
+    $this->actingAs($user)->post(route('seller.listings.store'), [
+        'category' => Category::Bags->value,
+        'type' => ListingType::Fixed->value,
+        'title' => 'No subcategory',
+        'condition' => ItemCondition::Good->value,
+        'price' => 25,
+    ])->assertSessionHasErrors('subcategory');
+});
+
 test('a seller without a verified shop cannot create listings', function () {
     $user = User::factory()->create();
     Shop::factory()->for($user, 'owner')->create(); // pending
@@ -88,6 +139,7 @@ test('a fixed listing requires a price', function () {
 
     $this->actingAs($user)->post(route('seller.listings.store'), [
         'category' => Category::Bags->value,
+        'subcategory' => Subcategory::ToteBags->value,
         'type' => ListingType::Fixed->value,
         'title' => 'Leather tote',
         'condition' => ItemCondition::Good->value,
@@ -99,6 +151,7 @@ test('reserve price cannot be below the starting bid', function () {
 
     $this->actingAs($user)->post(route('seller.listings.store'), [
         'category' => Category::Watches->value,
+        'subcategory' => Subcategory::Luxury->value,
         'type' => ListingType::Auction->value,
         'title' => 'Watch',
         'condition' => ItemCondition::Good->value,
@@ -114,6 +167,7 @@ test('uploaded images are stored and linked to the listing', function () {
 
     $this->actingAs($user)->post(route('seller.listings.store'), [
         'category' => Category::Clothing->value,
+        'subcategory' => Subcategory::Jackets->value,
         'type' => ListingType::Fixed->value,
         'title' => 'Wool coat',
         'condition' => ItemCondition::Good->value,
@@ -135,6 +189,7 @@ test('a seller can update their own listing but not another seller\'s', function
 
     $this->actingAs($owner)->patch(route('seller.listings.update', $listing), [
         'category' => $listing->category->value,
+        'subcategory' => $listing->subcategory->value,
         'title' => 'Updated title',
         'condition' => $listing->condition->value,
         'price' => 99,
@@ -145,6 +200,7 @@ test('a seller can update their own listing but not another seller\'s', function
     $other = User::factory()->create();
     $this->actingAs($other)->patch(route('seller.listings.update', $listing), [
         'category' => $listing->category->value,
+        'subcategory' => $listing->subcategory->value,
         'title' => 'Hijacked',
         'condition' => $listing->condition->value,
     ])->assertForbidden();

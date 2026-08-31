@@ -1,5 +1,54 @@
 export type ShopStatus = 'pending' | 'verified' | 'rejected' | 'suspended';
-export type Category = 'clothing' | 'watches' | 'bags';
+export type Category =
+    | 'clothing'
+    | 'bags'
+    | 'shoes'
+    | 'watches'
+    | 'accessories'
+    | 'jewelry';
+export type Subcategory =
+    | 't-shirts'
+    | 'shirts-blouses'
+    | 'polo-shirts'
+    | 'dresses'
+    | 'skirts'
+    | 'pants'
+    | 'jeans'
+    | 'shorts'
+    | 'jackets'
+    | 'hoodies-sweaters'
+    | 'activewear'
+    | 'vintage'
+    | 'shoulder-bags'
+    | 'handbags'
+    | 'crossbody-bags'
+    | 'sling-bags'
+    | 'tote-bags'
+    | 'backpacks'
+    | 'wallets'
+    | 'pouches'
+    | 'sneakers'
+    | 'casual-shoes'
+    | 'boots'
+    | 'sandals'
+    | 'heels'
+    | 'flats'
+    | 'slides'
+    | 'analog'
+    | 'digital'
+    | 'sports'
+    | 'luxury'
+    | 'caps-hats'
+    | 'sunglasses'
+    | 'belts'
+    | 'scarves'
+    | 'ties'
+    | 'hair-accessories'
+    | 'necklaces'
+    | 'earrings'
+    | 'bracelets'
+    | 'rings'
+    | 'brooches';
 export type ListingType = 'auction' | 'fixed';
 export type ListingStatus = 'draft' | 'active' | 'ended' | 'sold';
 export type ItemCondition = 'new_with_tags' | 'like_new' | 'good' | 'fair';
@@ -56,6 +105,9 @@ export type Listing = {
     id: number;
     shop_id: number;
     category: Category;
+    subcategory: Subcategory | null;
+    category_label: string | null;
+    subcategory_label: string | null;
     type: ListingType;
     title: string;
     description: string | null;
@@ -80,6 +132,16 @@ export type Order = {
     amount_cents: number;
     status: OrderStatus;
     payment_status: PaymentStatus;
+    ship_name: string | null;
+    ship_line1: string | null;
+    ship_line2: string | null;
+    ship_city: string | null;
+    ship_region: string | null;
+    ship_postal_code: string | null;
+    ship_country: string | null;
+    ship_phone: string | null;
+    shipping_carrier: string | null;
+    tracking_number: string | null;
     shipped_at: string | null;
     received_at: string | null;
     cancelled_at: string | null;
@@ -89,6 +151,41 @@ export type Order = {
     shop?: Shop;
     buyer?: ShopOwner;
     review?: ShopReview | null;
+};
+
+export type ChatMessage = {
+    id: number;
+    body: string;
+    sender_id: number;
+    sender_name: string;
+    created_at: string;
+};
+
+export type ConversationSummary = {
+    id: number;
+    listing: { id: number; title: string } | null;
+    counterpart: { id: number; name: string } | null;
+    unread_count: number;
+    last_message_at: string | null;
+};
+
+export type ConversationDetail = {
+    id: number;
+    shop: { id: number; name: string; slug: string };
+    listing: { id: number; title: string; slug?: string } | null;
+    counterpart: { id: number; name: string } | null;
+    messages: ChatMessage[];
+};
+
+export type AppNotification = {
+    id: string;
+    type: string;
+    message: string;
+    read_at: string | null;
+    created_at: string;
+    listing_id?: number;
+    order_id?: number;
+    conversation_id?: number;
 };
 
 export type ShopReview = {
@@ -106,3 +203,6 @@ export type SelectOption = {
     value: string;
     label: string;
 };
+
+/** Subcategory options keyed by category value, for dependent selects. */
+export type SubcategoryMap = Record<string, SelectOption[]>;
