@@ -1,7 +1,9 @@
-import { Head, Link, router } from '@inertiajs/react';
-import { ImageOff, ShoppingBag, Star } from 'lucide-react';
+import { Head, Link } from '@inertiajs/react';
+import { ImageOff, Star } from 'lucide-react';
 import { useState } from 'react';
 import { BidPanel } from '@/components/bid-panel';
+import { CheckoutDialog } from '@/components/checkout-dialog';
+import { ContactShopDialog } from '@/components/contact-shop-dialog';
 import { WatchButton } from '@/components/watch-button';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,7 +11,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { conditionLabel, formatCents, titleCase } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { login } from '@/routes';
-import { store as buyListing } from '@/routes/orders';
 import type { Listing } from '@/types';
 
 type Props = {
@@ -81,8 +82,14 @@ export default function ListingShow({ listing, canBid }: Props) {
                     <div>
                         <div className="mb-2 flex items-center gap-2">
                             <Badge variant="secondary">
-                                {titleCase(listing.category)}
+                                {listing.category_label ??
+                                    titleCase(listing.category)}
                             </Badge>
+                            {listing.subcategory_label && (
+                                <Badge variant="outline">
+                                    {listing.subcategory_label}
+                                </Badge>
+                            )}
                             {isAuction ? (
                                 <Badge>Auction</Badge>
                             ) : (
@@ -121,19 +128,10 @@ export default function ListingShow({ listing, canBid }: Props) {
                                     Sold
                                 </Badge>
                             ) : canBid ? (
-                                <Button
-                                    className="w-full"
-                                    size="lg"
-                                    onClick={() =>
-                                        router.post(
-                                            buyListing(listing.id).url,
-                                            {},
-                                            { preserveScroll: true },
-                                        )
-                                    }
-                                >
-                                    <ShoppingBag className="size-4" /> Buy now
-                                </Button>
+                                <CheckoutDialog
+                                    listingId={listing.id}
+                                    priceCents={priceCents}
+                                />
                             ) : (
                                 <Button
                                     asChild
@@ -143,6 +141,13 @@ export default function ListingShow({ listing, canBid }: Props) {
                                 >
                                     <Link href={login()}>Log in to buy</Link>
                                 </Button>
+                            )}
+
+                            {canBid && listing.shop && (
+                                <ContactShopDialog
+                                    listingId={listing.id}
+                                    shopName={listing.shop.name}
+                                />
                             )}
                         </CardContent>
                     </Card>

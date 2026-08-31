@@ -11,8 +11,23 @@ export type User = {
     [key: string]: unknown;
 };
 
+export type NotificationFeedItem = {
+    id: string;
+    type: string;
+    message: string;
+    read_at: string | null;
+    created_at: string;
+    listing_id?: number;
+    order_id?: number;
+    conversation_id?: number;
+};
+
 export type Auth = {
     user: User;
+    notifications?: {
+        unread: number;
+        items: NotificationFeedItem[];
+    } | null;
 };
 
 export type Passkey = {

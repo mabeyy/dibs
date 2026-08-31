@@ -3,9 +3,11 @@
 use App\Http\Controllers\Admin\ShopVerificationController;
 use App\Http\Controllers\BidController;
 use App\Http\Controllers\BrowseController;
+use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\ListingImageController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ShopApplicationController;
 use App\Http\Controllers\ShopController;
@@ -48,9 +50,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Orders
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::post('listings/{listing}/buy', [OrderController::class, 'store'])->name('orders.store');
+    Route::patch('orders/{order}/address', [OrderController::class, 'updateShippingAddress'])->name('orders.address.update');
     Route::patch('orders/{order}/ship', [OrderController::class, 'ship'])->name('orders.ship');
     Route::patch('orders/{order}/receive', [OrderController::class, 'receive'])->name('orders.receive');
+    Route::patch('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::post('orders/{order}/review', [ShopReviewController::class, 'store'])->name('orders.review');
+
+    // Notifications
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::patch('notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+
+    // Messaging
+    Route::get('messages', [ConversationController::class, 'index'])->name('messages.index');
+    Route::post('messages', [ConversationController::class, 'store'])->name('messages.store');
+    Route::get('messages/{conversation}', [ConversationController::class, 'show'])->name('messages.show');
+    Route::post('messages/{conversation}/reply', [ConversationController::class, 'reply'])->name('messages.reply');
 });
 
 // Admin moderation
