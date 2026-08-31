@@ -9,7 +9,18 @@ import SettingsLayout from '@/layouts/settings/layout';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
-const PUBLIC_PAGES = ['home', 'browse', 'listings/show', 'shops/show'];
+// Pages that use the header-based marketplace shell instead of the app sidebar.
+const MARKETPLACE_PAGES = [
+    'home',
+    'browse',
+    'listings/show',
+    'shops/show',
+    'orders/index',
+    'watchlist/index',
+    'messages/index',
+    'messages/show',
+    'notifications/index',
+];
 
 void createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
@@ -21,7 +32,7 @@ void createInertiaApp({
                 return AuthLayout;
             case name.startsWith('settings/'):
                 return [AppLayout, SettingsLayout];
-            case PUBLIC_PAGES.includes(name):
+            case MARKETPLACE_PAGES.includes(name):
                 return MarketplaceLayout;
             default:
                 return AppLayout;

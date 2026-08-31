@@ -2,10 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     BookOpen,
     FolderGit2,
-    Heart,
     LayoutGrid,
-    PackageSearch,
-    Receipt,
     ShieldCheck,
     Store,
     Tag,
@@ -23,12 +20,10 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { browse, dashboard } from '@/routes';
+import { dashboard } from '@/routes';
 import { index as adminShops } from '@/routes/admin/shops';
-import { index as ordersIndex } from '@/routes/orders';
 import { apply as sellerApply } from '@/routes/seller';
 import { index as sellerListings } from '@/routes/seller/listings';
-import { index as watchlistIndex } from '@/routes/watchlist';
 import type { NavItem } from '@/types';
 
 const footerNavItems: NavItem[] = [
@@ -54,24 +49,9 @@ export function AppSidebar() {
             icon: LayoutGrid,
         },
         {
-            title: 'Browse',
-            href: browse(),
-            icon: PackageSearch,
-        },
-        {
-            title: 'Watchlist',
-            href: watchlistIndex(),
-            icon: Heart,
-        },
-        {
             title: 'My listings',
             href: sellerListings(),
             icon: Tag,
-        },
-        {
-            title: 'Orders',
-            href: ordersIndex(),
-            icon: Receipt,
         },
         {
             title: 'Sell',
